@@ -170,6 +170,6 @@ export const createOrder = async(req,res,next)=>{
             break;
           // ... handle other event types
           default:
-            await order.orderModel.findOneAndUpdate({_id:orderId},{status:'Rejected'})
+            await orderModel.findOneAndUpdate({_id:orderId},{status:'Rejected'})
         }
       })
