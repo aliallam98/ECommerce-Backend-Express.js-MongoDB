@@ -166,7 +166,7 @@ export const createOrder = async(req,res,next)=>{
     //   break;
           case 'checkout.session.completed':
             const {orderId} = event.data.object.metadata
-            await order.orderModel.findOneAndUpdate({_id:orderId},{status:'Placed'})
+            await orderModel.findOneAndUpdate({_id:orderId},{status:'Placed'})
             break;
           // ... handle other event types
           default:
