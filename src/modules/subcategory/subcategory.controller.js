@@ -112,7 +112,7 @@ export const getAllSubCategoies = asyncHandler(async(req,res,next)=>{
 
   const apiFeatures = new ApiFeatures(subCategoryModel.find({}).populate([{
     path:"Products"
-  }]),req.query).pagination().filter().sort().search().select()
+  }]),req.query).pagination(subCategoryModel).filter().sort().search().select()
 
   const AllSubCategoies = await apiFeatures.mongooseQuery
 

@@ -5,7 +5,11 @@ import { fileValidation } from "../../utils/multer.js";
 import { validation } from "../../middleware/validation.js";
 import * as subCategoryValidators from "./subcategory.validation.js";
 const router = Router({ mergeParams: true });
+import productRouter from '../product/product.router.js'
 
+
+
+router.use("/:id/product", productRouter);
 router
   .route("/")
   .get(subCategoryController.getAllSubCategoies)

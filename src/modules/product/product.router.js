@@ -5,7 +5,10 @@ import { fileValidation } from "../../utils/multer.js";
 import { validation } from "../../middleware/validation.js";
 import * as productValidation from "./product.validation.js";
 import {auth , roles} from '../../middleware/auth.js'
-const router = Router();
+const router = Router({mergeParams:true});
+import reviewRouter from '../reviews/reviews.router.js'
+
+router.use('/:id/reviews',reviewRouter)
 
 router.get("/", productController.getAllProducts);
 router.get(

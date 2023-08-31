@@ -16,6 +16,7 @@ const productSchema = new Schema({
     subCategoryId:{type:Types.ObjectId , required:true ,ref:"subCategory"},
     brandId:{type:Types.ObjectId, ref:"Brand"},
     avgRate:{ type: Number, default: '0'},
+    ratesNums:{type:Number,default:'0'},
     soldItems:{ type: Number, default: '0'},
     createdBy :{ type:Types.ObjectId , required:true, ref:"User"},
     wishList : [{type:Types.ObjectId , ref:"User"}]

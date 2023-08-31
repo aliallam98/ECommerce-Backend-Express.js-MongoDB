@@ -3,8 +3,12 @@ import * as brandController from "./brand.controller.js";
 import * as brandValidtors from "./brand.validation.js";
 import { fileUpload, fileValidation } from "../../utils/multer.js";
 import { validation } from "../../middleware/validation.js";
-
+import productRouter from '../product/product.router.js'
 const router = Router();
+
+
+router.use('/:id/product',productRouter)
+
 
 router
   .route("/")

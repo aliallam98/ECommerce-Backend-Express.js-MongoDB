@@ -6,6 +6,7 @@ import { deleteOneById, getOneById } from "../../utils/code.handler.js";
 import { ApiFeatures } from "../../utils/api.features.js";
 import { ErrorClass } from "../../utils/ErrorClass.js";
 
+
 export const getAllBrands = asyncHandler(async (req, res, next) => {
   const apiFeatures = new ApiFeatures(
     brandModel.find({}).populate([

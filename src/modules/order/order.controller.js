@@ -147,28 +147,29 @@ export const createOrder = async(req,res,next)=>{
 
 
 
-
     export const stripeWebHook = asyncHandler(async(req, res) => {
         const sig = req.headers['stripe-signature'];
-    
         let event;
       
         try {
-          event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+          event = stripe.webhooks.constructEvent(req.body, sig, process.send.endpointSecret);
         } catch (err) {
           res.status(400).send(`Webhook Error: ${err.message}`);
           return;
         }
-      
+
         // Handle the event
         switch (event.type) {
+    //         case 'checkout.session.async_payment_failed':
+    //   const checkoutSessionAsyncPaymentFailed = event.data.object;
+    //   // Then define and call a function to handle the event checkout.session.async_payment_failed
+    //   break;
           case 'checkout.session.completed':
             const {orderId} = event.data.object.metadata
-            await order.orderModel.findOne({_id:orderId},{status:'Placed'})
+            await order.orderModel.findOneAndUpdate({_id:orderId},{status:'Placed'})
             break;
           // ... handle other event types
           default:
-            await order.orderModel.findOne({_id:orderId},{status:'Rejected'})
+            await order.orderModel.findOneAndUpdate({_id:orderId},{status:'Rejected'})
         }
-      
       })
