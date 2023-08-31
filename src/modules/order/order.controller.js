@@ -152,7 +152,7 @@ export const createOrder = async(req,res,next)=>{
         let event;
       
         try {
-          event = stripe.webhooks.constructEvent(req.body, sig, process.send.endpointSecret);
+          event = stripe.webhooks.constructEvent(req.body, sig, process.env.endpointSecret);
         } catch (err) {
           res.status(400).send(`Webhook Error: ${err.message}`);
           return;
