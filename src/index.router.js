@@ -16,7 +16,7 @@ import { globalErrorHandling } from './utils/errorHandling.js'
 const initApp = (app, express) => {
     //convert Buffer Data
     app.use((req,res,next)=>{
-        if(req.originalUrl == '/order/wenhook'){
+        if(req.originalUrl == '/order/webhook'){
             next()
         }else{
             express.json({})(req,res,next)
