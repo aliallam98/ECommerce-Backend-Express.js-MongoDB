@@ -1,18 +1,10 @@
-import { Schema, model , Types } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
 const userSchema = new Schema(
   {
-    firstName: {
+    fullName: {
       type: String,
-      required: [true, "userName is required"],
-      min: [2, "minimum length 2 char"],
-      max: [20, "max length 2 char"],
-    },
-    lastName: {
-      type: String,
-      required: [true, "userName is required"],
-      min: [2, "minimum length 2 char"],
-      max: [20, "max length 2 char"],
+      required: true,
     },
     email: {
       type: String,
@@ -23,33 +15,34 @@ const userSchema = new Schema(
       type: String,
       required: [true, "password is required"],
     },
-    OTPNumber: {
-      type: Number,
-      default: 4,
-    },
-    phone: {
-      type: String,
-    },
+    phone: [],
+    address:[],
+    age:String,
     role: {
       type: String,
-      default: "User",
-      enum: ["User", "Admin"],
+      default: "Customer",
+      enum: ["Customer", "Admin", "Super-Admin", "Vendor"],
     },
     status: {
       type: String,
-      default: "Offline",
-      enum: ["Online", "Offline", "Blocked"],
+      default: "UnBlocked",
+      enum: ["UnBlocked", "Blocked"],
     },
     confirmEmail: {
       type: Boolean,
       default: false,
     },
-    image: { secure_url: { type: String }, public_id: { type: String } },
+    profileImage: { secure_url: { type: String }, public_id: { type: String } },
     DOB: Date,
-    code: String,
-    wishList:[
-      {type : Types.ObjectId , ref:'Product'},
-    ],
+    OTPCode: {
+      code: String,
+      expireDate: Date,
+    },
+    OTPNumber: {
+      type: Number,
+      default: 0,
+    },
+    wishList: [{ type: Types.ObjectId, ref: "Product" }],
   },
   {
     timestamps: true,

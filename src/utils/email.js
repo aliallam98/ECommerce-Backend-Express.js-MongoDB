@@ -213,8 +213,6 @@ export const createHTML = (text)=>{
 }
 
 export const sendEmail = async ({to,subject,text,html,cc,bcc,attachments,} = {}) => {
-    console.log(process.env.gmail)
-
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {

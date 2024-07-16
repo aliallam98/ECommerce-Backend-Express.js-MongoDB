@@ -89,7 +89,7 @@ export const deleteReview = asyncHandler(async (req, res, next) => {
 });
 export const getReviewById = getOneById(reviewModel)
 export const getproductReviews = asyncHandler(async(req,res,next)=>{
-    const{ productId} = req.query 
+    const{productId} = req.query 
     const reviews = await reviewModel.find({productId})
     return res.status(200).json({message:'Done', reviews})
 })

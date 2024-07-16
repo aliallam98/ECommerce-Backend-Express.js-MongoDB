@@ -1,6 +1,6 @@
 import joi from "joi";
-import  { Types } from "mongoose";
-const dataMethods = ["body", "params", "query", "headers", "file"];
+import { Types } from "mongoose";
+const dataMethods = ["body", "params", "query", "headers", "file", "files"];
 
 const validateObjectId = (value, helper) => {
   // console.log({ value });
@@ -10,20 +10,16 @@ const validateObjectId = (value, helper) => {
     : helper.message("In-valid objectId");
 };
 
-
 export const generalFields = {
-  email: joi
-    .string()
-    .email({
-      minDomainSegments: 2,
-      maxDomainSegments: 4,
-      tlds: { allow: ["com", "net"] },
-    })
-    .required(),
+  email: joi.string().email({
+    minDomainSegments: 2,
+    maxDomainSegments: 4,
+    tlds: { allow: ["com", "net"] },
+  }),
   password: joi.string(),
   cPassword: joi.string().required(joi.ref("password")),
-  id: joi.string().custom(validateObjectId).required(),
-  name: joi.string().required(),
+  id: joi.string().custom(validateObjectId),
+  name: joi.string(),
   file: joi.object({
     size: joi.number().positive().required(),
     path: joi.string().required(),
@@ -33,12 +29,13 @@ export const generalFields = {
     encoding: joi.string().required(),
     originalname: joi.string().required(),
     fieldname: joi.string().required(),
-  })
+  }),
 };
 
 export const validation = (schema) => {
   return (req, res, next) => {
     const validationErr = [];
+
     dataMethods.forEach((key) => {
       if (schema[key]) {
         const validationResult = schema[key].validate(req[key], {
@@ -51,7 +48,7 @@ export const validation = (schema) => {
     });
 
     if (validationErr.length) {
-      return res.json({ message: "Validation Err", validationErr });
+      return res.status(422).json({ success:false, message: "Validation Err", validationErr });
     }
     return next();
   };

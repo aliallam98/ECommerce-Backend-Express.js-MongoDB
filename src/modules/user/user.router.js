@@ -1,14 +1,17 @@
 import { Router } from "express";
-const router = Router()
+import * as userController from "./user.controller.js";
+import { auth } from "../../middleware/auth.js";
+import { endpoint } from "./user.endPoint.js";
+import { fileUpload, fileValidation } from "../../utils/multer.js";
+const router = Router();
 
+router.get("/wish-list", auth(endpoint.getCart), userController.getWishList);
+router.get("/profile", auth(endpoint.getCart), userController.getPersonalInfo);
+router.put(
+  "/update",
+  auth(endpoint.getCart),
+  fileUpload(fileValidation.image).single("profileImage"),
+  userController.updatePersonalInfo
+);
 
-
-
-router.get('/', (req ,res)=>{
-    res.status(200).json({message:"User Module"})
-})
-
-
-
-
-export default router
+export default router;

@@ -42,11 +42,12 @@
 
 import multer from 'multer'
 export const fileValidation = {
-    image: ['image/jpeg', 'image/png', 'image/gif'],
+    image: ['image/jpeg', 'image/png', 'image/gif',"image/jfif","image/webp"],
     file: ['application/pdf', 'application/msword'],
     video: ['video/mp4']
 }
 export function fileUpload(customValidation = []) {
+
     const storage = multer.diskStorage({})
     function fileFilter(req, file, cb) {
         if (customValidation.includes(file.mimetype)) {
@@ -58,3 +59,4 @@ export function fileUpload(customValidation = []) {
     const upload = multer({ fileFilter, storage })
     return upload
 }
+

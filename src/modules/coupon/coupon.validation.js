@@ -13,7 +13,6 @@ export const addNewCoupon = {
     }),
     query: joi.object().required().keys({})
 }
-
 export const updateCoupon = {
     body: joi.object().required().keys({
         name: generalFields.name,
@@ -21,17 +20,23 @@ export const updateCoupon = {
     }),
     file: generalFields.file,
     params: joi.object().required().keys({
-        couponId:generalFields.id
+        id:generalFields.id
     }),
     query: joi.object().required().keys({})
 }
-
-
 export const deleteCoupon = {
     body: joi.object().required().keys({}),
     file: generalFields.file,
     params: joi.object().required().keys({
-        couponId:generalFields.id
+        id:generalFields.id
+    }),
+    query: joi.object().required().keys({})
+}
+export const getCoupon = {
+    body: joi.object().required().keys({}),
+    file: generalFields.file,
+    params: joi.object().required().keys({
+        id:generalFields.id
     }),
     query: joi.object().required().keys({})
 }

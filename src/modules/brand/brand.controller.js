@@ -5,35 +5,63 @@ import cloudinary from "../../utils/cloudinary.js";
 import { deleteOneById, getOneById } from "../../utils/code.handler.js";
 import { ApiFeatures } from "../../utils/api.features.js";
 import { ErrorClass } from "../../utils/ErrorClass.js";
+import productModel from "../../../DB/model/Product.model.js";
 
-
-export const getAllBrands = asyncHandler(async (req, res, next) => {
-  const apiFeatures = new ApiFeatures(
-    brandModel.find({}).populate([
-      {
-        path: "Products",
-      },
-    ]),
-    req.query
-  )
-    .pagination()
-    .filter()
-    .sort()
-    .search()
-    .select();
-  const allBrands = await apiFeatures.mongooseQuery;
-  return res.status(200).json({ message: "Done", allBrands });
+export const allBrands = asyncHandler(async (req, res, next) => {
+  const brands = await brandModel.find({}).populate({
+    path: "createdBy",
+    select: "fullName",
+  });
+  return res
+    .status(200)
+    .json({ success: true, message: "Done", results: brands });
 });
-export const createNewBrand = asyncHandler(async (req, res, next) => {
+export const getAllBrands = asyncHandler(async (req, res, next) => {
+  const { results, metaData } = await ApiFeatures(brandModel, req.query);
+
+  return res.status(200).json({
+    success: true,
+    message: "Done",
+    results: {
+      brands: results,
+      metaData,
+    },
+  });
+});
+export const getBrandByNameWithProducts = asyncHandler(
+  async (req, res, next) => {
+    const brandName = req.params.name;
+
+    const isBrandExist = await brandModel.findOne({ name: brandName });
+    if (!isBrandExist) {
+      return next(new ErrorClass("Cannot find brand"));
+    }
+
+    const { results, metaData } = await ApiFeatures(productModel, req.query, {
+      brandId: isBrandExist._id,
+    });
+
+    // console.log({ results, metaData });
+
+    return res.status(200).json({
+      success: true,
+      message: "Done",
+      results: {
+        products: results,
+        metaData,
+      },
+    });
+  }
+);
+
+export const createBrand = asyncHandler(async (req, res, next) => {
   const { name } = req.body;
   const slug = slugify(name);
   const { path } = req.file;
 
   const checkBrandName = await brandModel.findOne({ name });
   if (checkBrandName) {
-    return next(
-      new ErrorClass(`Cannot Add This name:${name} its Exist `, 409 )
-    );
+    return next(new ErrorClass(`Cannot Add This name:${name} its Exist `, 409));
   }
 
   const { secure_url, public_id } = await cloudinary.uploader.upload(path, {
@@ -44,30 +72,39 @@ export const createNewBrand = asyncHandler(async (req, res, next) => {
     name,
     slug,
     image: { secure_url, public_id },
-    createdBy : req.user._id
+    createdBy: req.user._id,
   });
-  return res.status(201).json({ message: "Added Done", brand });
+  return res
+    .status(201)
+    .json({
+      success: true,
+      message: `Brand: ${brand.name} created`,
+      results: brand,
+    });
 });
+
 export const updateBrand = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  req.body.name = req.body.name;
-  req.body.slug = slugify(req.body.name);
+  if (req.body.name) {
+    req.body.slug = slugify(req.body.name);
+  }
 
   const checkBrandExisting = await brandModel.findById(id);
   if (!checkBrandExisting) {
-    return next(
-      new ErrorClass(`Cannot Find This Brand its Not Exist `,  404 )
-    );
+    return next(new ErrorClass(`Cannot Find This Brand its Not Exist `, 404));
   }
+
   const checkBrandName = await brandModel.findOne({
     name: req.body.name,
     _id: { $ne: id },
   });
+
   if (checkBrandName) {
     next(
       new ErrorClass(`Cannot Add This name:${req.body.name} its Exist `, 409)
     );
   }
+
   if (req.file) {
     const { secure_url, public_id } = await cloudinary.uploader.upload(
       req.file.path,
@@ -78,10 +115,18 @@ export const updateBrand = asyncHandler(async (req, res, next) => {
     await cloudinary.uploader.destroy(checkBrandExisting.image.public_id);
     req.body.image = { secure_url, public_id };
   }
-  const updateBrand = await brandModel.findByIdAndUpdate(id, req.body, {
+
+  const brandToUpdate = await brandModel.findByIdAndUpdate(id, req.body, {
     new: true,
   });
-  return res.status(201).json({ message: "updated Done", updateBrand });
+  return res
+    .status(201)
+    .json({
+      success: true,
+      message: `Brand: ${brandToUpdate.name} Updated`,
+      results: brandToUpdate,
+    });
 });
+
 export const deleteBrand = deleteOneById(brandModel);
 export const getBrandById = getOneById(brandModel);

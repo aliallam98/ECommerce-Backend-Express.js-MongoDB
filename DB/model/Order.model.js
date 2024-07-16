@@ -25,14 +25,14 @@ const orderSchema = new Schema({
         required:true
       }
   ],
-  adresse:{
+  address:{
     type:String,
     required:true
   },
   status:{
     type:String,
     default:"Placed",
-    enum:['Placed', 'WaitPayment', "Canceled", 'Rejected', 'Rood', 'Delivered']
+    enum:['Placed', 'WaitPayment', "Canceled", 'Rejected', 'OnRood', 'Delivered']
   },
   paymentMethod:{
     type:String,

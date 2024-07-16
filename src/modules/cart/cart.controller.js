@@ -4,8 +4,10 @@ import { ErrorClass } from "../../utils/ErrorClass.js";
 import cartModel from "../../../DB/model/Cart.model.js";
 import { getOneById } from "../../utils/code.handler.js";
 
+//
 export const addToCart = asyncHandler(async (req, res, next) => {
   const { productId, quantity } = req.body;
+
   const product = await productModel.findById(productId);
   if (!product) {
     return next(new ErrorClass("This Product Is Not Found ", 404));
@@ -20,10 +22,12 @@ export const addToCart = asyncHandler(async (req, res, next) => {
   }
 
   const cart = await cartModel.findOne({ userId: req.user._id });
-  const productIndex = cart.products.findIndex((ele) =>  ele.productId.toString() == productId);
+  const productIndex = cart.products.findIndex(
+    (ele) => ele.productId.toString() == productId
+  );
   if (productIndex == -1) {
     cart.products.push({
-        productId: productId,
+      productId: productId,
       quantity,
     });
   } else {
@@ -31,46 +35,82 @@ export const addToCart = asyncHandler(async (req, res, next) => {
   }
 
   cart.save();
-  return res.status(200).json({ message: "Done", cart });
+  return res
+    .status(200)
+    .json({ success: true, message: "Done", results: cart });
 });
-// export const updateCart = 
-export const deleteFromCart = asyncHandler(async(req,res,next)=>{
-        // const product = cart.products.find((ele)=> ele.productId == req.params.id)
 
-    const product = await cartModel.findOne({userId:req.user._id , 'products.productId' : req.params.id})
-    if(!product){
-        return next(new ErrorClass("This Product Is Not Found ", 404));
+export const deleteFromCart = asyncHandler(async (req, res, next) => {
+  // const product = cart.products.find((ele)=> ele.productId == req.params.id)
+
+  const product = await cartModel.findOne({
+    userId: req.user._id,
+    "products.productId": req.params.id,
+  });
+  if (!product) {
+    return next(new ErrorClass("This Product Is Not Found ", 404));
+  }
+  
+  const cart = await cartModel.findOneAndUpdate(
+    { userId: req.user._id },
+    {
+      $pull: {
+        products: {
+          productId: req.params.id,
+        },
+      },
     }
-    const cart = await cartModel.findOneAndUpdate({userId:req.user._id},{
-        $pull: {
-            products:{
-                productId : req.params.id
-            }
-        }
-    })
+  );
 
-    res.json({cart, Products : cart.products})
-})
-export const clearAllCart = asyncHandler(async(req,res,next)=>{
-    const cart = await cartModel.findOneAndUpdate({userId:req.user._id},{
-            products:[]
-    })
+  res.json({ cart, Products: cart.products });
+});
 
-    res.json({cart, Products : cart.products})
-})
-export const getUserCart = asyncHandler(async(req,res,next)=>{
-    const cart = await cartModel.findOne({userId : req.user._id}).populate([
-        {path:'products.productId', select:'name paymentPrice'}
-    ])
+//
+export const clearAllCart = asyncHandler(async (req, res, next) => {
+  if (!req.user._id) return;
 
-    let totalPrice = 0
-    cart.products = cart.products.filter((ele)=> {
-        if(ele?.productId){
-        totalPrice += ele.productId.paymentPrice * ele.quantity
-        return ele
-        }
-    })
-     cart.save()
-    return res.status(200).json({message:"Done", cart, totalPrice})
-})
-export const getCartById = getOneById(cartModel)
+  await cartModel.findOneAndUpdate(
+    { userId: req.user._id },
+    {
+      products: [],
+    },
+    { new: true }
+  );
+
+  return res
+    .status(200)
+    .json({ success: true, message: "Cart is empty now ", results: [] });
+});
+
+//
+export const getCartById = getOneById(cartModel);
+
+//
+export const getUserCart = asyncHandler(async (req, res, next) => {
+  // console.log("aaaa","aaaaaaaaaa");
+
+  const cart = await cartModel
+    .findOne({ userId: req.user._id })
+    .populate([
+      { path: "products.productId", select: "name images paymentPrice" },
+    ]);
+
+  // console.log("cart",cart);
+  if (!cart.products.length) {
+    return res
+      .status(200)
+      .json({ success: true, message: "Done", results: [] });
+  }
+
+  let totalPrice = 0;
+  cart.products = cart.products.filter((ele) => {
+    if (ele?.productId) {
+      totalPrice += ele.productId.paymentPrice * ele.quantity;
+      return ele;
+    }
+  });
+  cart.save();
+  return res
+    .status(200)
+    .json({ success: true, message: "Done", results: { cart, totalPrice } });
+});

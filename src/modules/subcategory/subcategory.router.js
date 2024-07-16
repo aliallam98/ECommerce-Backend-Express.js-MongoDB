@@ -6,16 +6,18 @@ import { validation } from "../../middleware/validation.js";
 import * as subCategoryValidators from "./subcategory.validation.js";
 const router = Router({ mergeParams: true });
 import productRouter from '../product/product.router.js'
+import {auth} from '../../middleware/auth.js'
+import { endpoint } from "./subcategory.endPoint.js";
 
 
 
 router.use("/:id/product", productRouter);
 router
   .route("/")
-  .get(subCategoryController.getAllSubCategoies)
-  .post(
+  .get(subCategoryController.AllSubCategories)
+  .post(auth(endpoint.create),
     fileUpload(fileValidation.image).single("image"),
-    validation(subCategoryValidators.addNewSubCategory),
+    validation(subCategoryValidators.create),
     subCategoryController.addNewSubCategory
   );
 
@@ -24,16 +26,16 @@ router
 //
 router
   .route("/:id")
-  .put(
+  .put(auth(endpoint.update),
     fileUpload(fileValidation.image).single("image"),
-    validation(subCategoryValidators.updateSubCategory),
+    validation(subCategoryValidators.update),
     subCategoryController.updateSubCategory
   )
   .get(
     validation(subCategoryValidators.getSubCategoryById),
     subCategoryController.getSubCategoryById
   )
-  .delete(
+  .delete(auth(endpoint.delete),
     validation(subCategoryValidators.deleteSubCategory),
     subCategoryController.deleteSubCategory
   );

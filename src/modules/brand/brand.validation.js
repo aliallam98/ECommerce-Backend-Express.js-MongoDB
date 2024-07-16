@@ -1,40 +1,41 @@
-import Joi from 'joi'
+import joi from 'joi'
 import { generalFields } from '../../middleware/validation.js'
 
 
 
 
-export const createNewBrand = {
-    body:Joi.object().required().keys({
+export const create = {
+    body:joi.object().required().keys({
         name:generalFields.name,
     }),
     file:generalFields.file.required(),
-    params:Joi.object().required().keys(),
-    query:Joi.object().required().keys(),
+    params:joi.object().required().keys(),
+    query:joi.object().required().keys(),
 }
-export const updateBrand =  {
-    body:Joi.object().required().keys({
+
+export const update =  {
+    body:joi.object().required().keys({
         name:generalFields.name,
     }),
     file:generalFields.file,
-    params:Joi.object().required().keys(
+    params:joi.object().required().keys(
        { id : generalFields.id}
     ),
-    query:Joi.object().required().keys(),
+    query:joi.object().required().keys({}),
 }
 export const deleteBrand =  {
-    body:Joi.object().required().keys(),
-    file:Joi.object().keys(),
-    params:Joi.object().required().keys({
+    body:joi.object().required().keys(),
+    file:joi.object().keys(),
+    params:joi.object().required().keys({
         id:generalFields.id
     }),
-    query:Joi.object().required().keys(),
+    query:joi.object().required().keys(),
 }
 export const getBrandById =  {
-    body:Joi.object().required().keys(),
-    file:Joi.object().keys(),
-    params:Joi.object().required().keys({
+    body:joi.object().required().keys(),
+    file:joi.object().keys(),
+    params:joi.object().required().keys({
         id:generalFields.id
     }),
-    query:Joi.object().required().keys(),
+    query:joi.object().required().keys(),
 }

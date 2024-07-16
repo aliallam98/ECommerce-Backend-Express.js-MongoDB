@@ -4,11 +4,12 @@ import { fileUpload } from "../../utils/multer.js";
 import { fileValidation } from "../../utils/multer.js";
 import { validation } from "../../middleware/validation.js";
 import * as productValidation from "./product.validation.js";
-import {auth , roles} from '../../middleware/auth.js'
-const router = Router({mergeParams:true});
-import reviewRouter from '../reviews/reviews.router.js'
+import { auth } from "../../middleware/auth.js";
+import { endpoint } from "./product.endPoint.js";
+import reviewRouter from "../reviews/reviews.router.js";
+const router = Router({ mergeParams: true });
 
-router.use('/:id/reviews',reviewRouter)
+router.use("/:id/reviews", reviewRouter);
 
 router.get("/", productController.getAllProducts);
 router.get(
@@ -16,35 +17,57 @@ router.get(
   validation(productValidation.getProductById),
   productController.getProductById
 );
+router.get(
+  "/related-products/:id",
+  validation(productValidation.getProductById),
+  productController.getRelatedProducts
+);
 
 router.post(
   "/",
-  auth([roles.admin]),
+  auth(endpoint.create),
   fileUpload(fileValidation.image).fields([
     { name: "image", maxCount: 1 },
     { name: "images", maxCount: 5 },
   ]),
-  validation(productValidation.createNewProduct),
+  validation(productValidation.create),
   productController.createNewProduct
 );
 
 router.put(
-  "/:productId",
+  "/:id",
+  auth(endpoint.updateProduct),
   fileUpload(fileValidation.image).fields([
     { name: "image", maxCount: 1 },
     { name: "images", maxCount: 5 },
-  ]),validation(productValidation.updateProduct),
+  ]),
+  validation(productValidation.updateProduct),
   productController.updateProduct
 );
 
 router.delete(
   "/:id",
+  auth(endpoint.deleteProduct),
   validation(productValidation.deleteProduct),
   productController.deleteProduct
 );
 
-// Add To WishList
-router.patch('/wishlist/add/:productId', auth([roles.user]),productController.addToWishList) //Add
-router.patch('/wishlist/remove/:productId', auth([roles.user]),productController.removeFromWishList) //Remove
-router.patch('/wishlist/clear', auth([roles.user]),productController.clearAllWishList) //Clear
+// Start WishList
+router.patch(
+  "/wishlist/add/:productId",
+  auth(endpoint.add),
+  productController.addToWishList
+); //Add
+router.patch(
+  "/wishlist/remove/:productId",
+  auth(endpoint.remove),
+  productController.removeFromWishList
+); //Remove
+router.patch(
+  "/wishlist/clear",
+  auth(endpoint.clear),
+  productController.clearAllWishList
+); //Clear
+// End WishList
+
 export default router;

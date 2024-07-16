@@ -2,9 +2,9 @@ import slugify from "slugify";
 import { asyncHandler } from "../../utils/errorHandling.js";
 import couponModel from "../../../DB/model/Coupon.model.js";
 import cloudinary from "../../utils/cloudinary.js";
+import { deleteOneById, getOneById } from "../../utils/code.handler.js";
 
 export const addNewcoupon = asyncHandler(async (req, res, next) => {
-  console.log(req.user._id);
   const { name } = req.body;
   const isExist = await couponModel.findOne({ name });
   if (isExist) {
@@ -25,16 +25,16 @@ export const addNewcoupon = asyncHandler(async (req, res, next) => {
   return res.status(201).json({ message: "Done", coupon });
 });
 export const updateCoupon = asyncHandler(async (req, res, next) => {
-  const { couponId } = req.params;
+  const { id } = req.params;
   req.body.name = req.body.name;
 
-  const isExist = await couponModel.findById(couponId);
+  const isExist = await couponModel.findById(id);
   if (!isExist) {
     return next(new Error("This coupon is Not Exist", {cause:400}));
   }
   const checkCouponName = await couponModel.findOne({
     name:req.body.name,
-    _id: { $ne: couponId },
+    _id: { $ne: id },
   });
   if (checkCouponName) {
     return next(new Error(`This coupon Name: ${req.body.name} Is Exist`, {cause:409}));
@@ -51,22 +51,16 @@ export const updateCoupon = asyncHandler(async (req, res, next) => {
   }
   await isExist .save()
   const coupon = await couponModel.findByIdAndUpdate(
-    couponId,
+    id,
     req.body,
     { new: true }
   );
   return res.status(201).json({message:"Done", coupon})
 });
-export const deleteCoupon = asyncHandler(async (req, res, next) => {
-  const { couponId } = req.params;
-  const coupon = await couponModel.findByIdAndDelete(couponId)
-if(!coupon){
-  return next(new Error("coupon Not Found", {cause:404}))
-}
-  return res.status(200).json({ message: "Deleted Successfully" });
-});
+export const deleteCoupon = deleteOneById(couponModel)
 
 export const getAllCoupons = asyncHandler(async(req,res,next)=>{
   const allCoupons = await couponModel.find({})
   return res.status(200).json({message:"Done", allCoupons})
 })
+export const getCouponById = getOneById(couponModel)

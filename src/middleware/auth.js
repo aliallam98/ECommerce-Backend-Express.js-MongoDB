@@ -1,72 +1,53 @@
-import jwt from "jsonwebtoken";
-import userModel from "../../DB/model/User.model.js"
-import { verifyToken } from "../utils/GenerateAndVerifyToken.js";
+import userModel from "../../DB/model/User.model.js";
 import { ErrorClass } from "../utils/ErrorClass.js";
+import { verifyToken } from "../utils/GenerateAndVerifyToken.js";
 
 
+export const AvailableRoles = {
+  superAdmin: "Super-Admin",
+  admin: "Admin",
+  user: "User",
+};
 
-// const auth = async (req, res, next) => {
-//     try {
-//         const { authorization } = req.headers;
-//         if (!authorization?.startsWith(process.env.BEARER_KEY)) {
-//             return res.json({ message: "In-valid bearer key" })
-//         }
-//         const token = authorization.split(process.env.BEARER_KEY)[1]
-//         if (!token) {
-//             return res.json({ message: "In-valid token" })
-//         }
-//         const decoded = jwt.verify(token, process.env.TOKEN_SIGNATURE)
-//         if (!decoded?.id) {
-//             return res.json({ message: "In-valid token payload" })
-//         }
-//         const authUser = await userModel.findById(decoded.id).select('userName email role')
-//         if (!authUser) {
-//             return res.json({ message: "Not register account" })
-//         }
-//         req.user = authUser;
-//         return next()
-//     } catch (error) {
-//         return res.json({ message: "Catch error" , err:error?.message })
-//     }
-// }
+export const auth = (roles = [], permissions = "") => {
+  return async (req, res, next) => {
+    try {
+      let { ecommercejwt:token } = req.cookies
+      console.log("token",token);
+
+      if (!token?.startsWith(process.env.BEARER_KEY)) {
+        return next(new ErrorClass("Authorization Is Required", 401));
+      }
 
 
-export const roles = {
-    admin : "Admin",
-    user : "User"
-}
+       token = token.split(process.env.BEARER_KEY)[1];
 
-export const auth = (roles = [])=>{
-    return async(req,res,next)=>{
-        try {
-            const {authorization} = req.headers
-            if(!authorization?.startsWith(process.env.BEARER_KEY)){
-                return next(new ErrorClass("Authorization Is Required"))
-            }
-            const token = authorization.split(process.env.BEARER_KEY)[1]
-            if(!token){
-                return next(new ErrorClass("token Is Required"))
-            }
-            const decoded = verifyToken({token})
-            if(!decoded?.id){
-                return next(new ErrorClass("Invaild Payload Data"))
-            }
-            const user = await userModel.findById(decoded.id)
-            if(!user){
-                return next(new ErrorClass("Not Registered Account"))
-            }
+      if (!token) {
+        return next(new ErrorClass("token Is Required", 401));
+      }
 
+      const decoded = verifyToken({ token });
+      if (!decoded?.id) {
+        return next(new ErrorClass("Invaild Payload Data", 401));
+      }
 
-            if(!roles.includes(user.role)){
-                return next(new ErrorClass("you arre Unauthorized ", 401))
-            }
-            req.user = user
-            next()
-    
-        } catch (error) {
-        return res.json({ message: "Catch error" , err:error?.message })
-            
-        }
+      const user = await userModel.findById(decoded.id);
+      if (!user) {
+        return next(new ErrorClass("Not Registered Account", 404));
+      }
+
+      if (
+        roles.length > 0 &&
+        !roles.includes(user.role) ||
+        permissions.length > 0 &&
+        !user.permissions.includes(permissions)
+      ) {
+        return next(new ErrorClass("You are Unauthorized", 401));
+      }
+      req.user = user;
+      next();
+    } catch (error) {
+      return res.json({ message: "Catch error", err: error?.message });
     }
-}
-
+  };
+};
